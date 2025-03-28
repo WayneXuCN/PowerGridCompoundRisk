@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Mac OS X generated files
+.DS_Store
+
+# PyCharm generated files
+.idea/
+
+# Visual Studio Code generated files
+.vscode/
+
+# Jupyter Notebook generated files
+.ipynb_checkpoints/
+
+# 忽略所有.npy和.npz文件
+*.npy
+*.npz
