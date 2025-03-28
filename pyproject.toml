@@ -1,0 +1,32 @@
+[project]
+name = "new"
+version = "0.0.1"
+description = "My new paper"
+authors = [
+   {name = "Wenjie Xu", email = "wenjie.xu.cn@outlook.com"},
+]
+keywords = ["resilience","infrastructure","networks"]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>2.0",
+    "scipy",
+    "igraph",
+    "matplotlib",
+    "pandas",
+    "notebook",
+    "plotly",
+    "pycairo",
+    "torch",
+    "torch_geometric",
+    "tensorflow",
+    "scikit-learn",
+    "numba",
+    "networkx"
+]
+
+[project.urls]
+Homepage = "https://wenjiexucn.github.io"
+Documentation = "https://readthedocs.org"
+Repository = "https://github.com/WayneXuCN/spam.git"
