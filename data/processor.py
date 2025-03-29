@@ -4,7 +4,7 @@ import igraph as ig
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from scipy.sparse import coo_matrix, csr_matrix, lil_matrix, diags, eye
+from scipy.sparse import coo_matrix, csr_matrix, lil_matrix, diags, eye, triu
 from scipy.sparse.linalg import inv
 
 from config.parameters import ClimateParams
@@ -79,9 +79,9 @@ class PowerGridProcessor:
 
         # 地球半径 (km)
         R = 6371
-        distances = R * c
+        distances = (R * c).astype(np.float32)  # 单精度
         print(f"距离矩阵计算完成，形状：{distances.shape}")
-        return distances
+        return triu(distances, k=1)  # 返回稀疏上三角
 
     def _compute_hodge_laplacian(self, g):
         """生成稀疏邻接矩阵和高阶拓扑表示"""
@@ -198,7 +198,8 @@ class PowerGridProcessor:
 
     def _save_processed_data(self, distances, adj_sparse, B1, L1_tilde, X, edge_features):
         """保存预处理结果"""
-        np.save(PROCESSED_DATA_DIR / "distances.npy", distances)
+        # 使用稀疏矩阵格式保存
+        sp.save_npz(PROCESSED_DATA_DIR / "distances.npz", distances)
         sp.save_npz(PROCESSED_DATA_DIR / "adj_sparse.npz", adj_sparse)
         sp.save_npz(PROCESSED_DATA_DIR / "B1.npz", B1)
         sp.save_npz(PROCESSED_DATA_DIR / "L1_tilde.npz", L1_tilde)
