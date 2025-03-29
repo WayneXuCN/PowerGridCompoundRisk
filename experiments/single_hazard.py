@@ -1,6 +1,6 @@
 import numpy as np
 from data.processor import PowerGridProcessor
-from models.gnn import GCNTrainer
+from models.HOTGNN import GCNTrainer
 from models.dynamic import DynamicSimulator
 from utils.metrics import calculate_failure_rate
 

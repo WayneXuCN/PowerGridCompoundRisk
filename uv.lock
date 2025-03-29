@@ -1393,45 +1393,6 @@ wheels = [
 ]
 
 [[package]]
-name = "new"
-version = "0.0.1"
-source = { virtual = "." }
-dependencies = [
-    { name = "igraph" },
-    { name = "matplotlib" },
-    { name = "networkx" },
-    { name = "notebook" },
-    { name = "numba" },
-    { name = "numpy" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "pycairo" },
-    { name = "scikit-learn" },
-    { name = "scipy" },
-    { name = "tensorflow" },
-    { name = "torch" },
-    { name = "torch-geometric" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "igraph" },
-    { name = "matplotlib" },
-    { name = "networkx" },
-    { name = "notebook" },
-    { name = "numba" },
-    { name = "numpy", specifier = ">2.0" },
-    { name = "pandas" },
-    { name = "plotly" },
-    { name = "pycairo" },
-    { name = "scikit-learn" },
-    { name = "scipy" },
-    { name = "tensorflow" },
-    { name = "torch" },
-    { name = "torch-geometric" },
-]
-
-[[package]]
 name = "notebook"
 version = "7.3.3"
 source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
@@ -1827,6 +1788,45 @@ dependencies = [
 sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/c7/cc/e41b5f697ae403f0b50e47b7af2e36642a193085f553bf7cc1169362873a/plotly-6.0.1.tar.gz", hash = "sha256:dd8400229872b6e3c964b099be699f8d00c489a974f2cfccfad5e8240873366b", size = 8094643 }
 wheels = [
     { url = "https://pypi.tuna.tsinghua.edu.cn/packages/02/65/ad2bc85f7377f5cfba5d4466d5474423a3fb7f6a97fd807c06f92dd3e721/plotly-6.0.1-py3-none-any.whl", hash = "sha256:4714db20fea57a435692c548a4eb4fae454f7daddf15f8d8ba7e1045681d7768", size = 14805757 },
+]
+
+[[package]]
+name = "powergridcompoundrisk"
+version = "0.0.1"
+source = { virtual = "." }
+dependencies = [
+    { name = "igraph" },
+    { name = "matplotlib" },
+    { name = "networkx" },
+    { name = "notebook" },
+    { name = "numba" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "pycairo" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+    { name = "tensorflow" },
+    { name = "torch" },
+    { name = "torch-geometric" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "igraph" },
+    { name = "matplotlib" },
+    { name = "networkx" },
+    { name = "notebook" },
+    { name = "numba" },
+    { name = "numpy", specifier = ">2.0" },
+    { name = "pandas" },
+    { name = "plotly" },
+    { name = "pycairo" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+    { name = "tensorflow" },
+    { name = "torch" },
+    { name = "torch-geometric" },
 ]
 
 [[package]]
