@@ -1,116 +1,206 @@
-# 电力网络气候复合风险
+# <p align="center"> PowerGridCompoundRisk </p>
 
-## 项目简介
-本项目构建动态系统模型与复合风险分析框架，研究洪水/热浪/干旱对欧洲电网（13,478节点）的连锁失效效应。核心功能包括：
-- 基于图神经网络（GNN）的初始失效概率预测
-- 动态传播因子（DPF）驱动的时空演化模拟
-- 注意力增强风险交互网络（ARIN）的复合风险建模
+##### <p align="center"> [Wenjie Xu<sup>1,2</sup>](https://wenjiexucn.github.io/), Author<sup>1</sup>, Author<sup>2</sup>
 
-## 项目结构
-```text
-project/
-├── config/            # 配置管理
-├── data/              # 数据生命周期
-│   ├── raw/           # 原始电网数据
-│   ├── processed/     # 预处理数据
-│   └── results/       # 实验结果
-├── models/            # 核心算法实现
-├── utils/             # 工具函数
-├── experiments/       # 独立实验脚本
-├── scripts/           # 辅助脚本
-├── notebooks/         # 探索性分析（可选）
-└── requirements.txt   # 依赖清单
+##### <p align="center"> <sup>1</sup>Institutes of Science and Development, Chinese Academy of Sciences, Beijing 100190, China; <br> <sup>2</sup>School of Public Policy and Management, University of Chinese Academy of Sciences, Beijing 100049, China</p>
+
+A short description of the project.
+
+## Project Organization
+
+```
+├── LICENSE            <- Open-source license if one is chosen
+├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
+├── README.md          <- The top-level README for developers using this project.
+├── data
+│   ├── external       <- Data from third party sources.
+│   ├── interim        <- Intermediate data that has been transformed.
+│   ├── processed      <- The final, canonical data sets for modeling.
+│   └── raw            <- The original, immutable data dump.
+│
+├── docs               <- A default mkdocs project; see www.mkdocs.org for details
+│
+├── models             <- Trained and serialized models, model predictions, or model summaries
+│
+├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
+│                         the creator's initials, and a short `-` delimited description, e.g.
+│                         `1.0-jqp-initial-data-exploration`.
+│
+├── pyproject.toml     <- Project configuration file with package metadata for 
+│                         src and configuration for tools like black
+│
+├── references         <- Data dictionaries, manuals, and all other explanatory materials.
+│
+├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
+│   └── figures        <- Generated graphics and figures to be used in reporting
+│
+├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
+│                         generated with `pip freeze > requirements.txt`
+│
+├── setup.cfg          <- Configuration file for flake8
+│
+└── src   <- Source code for use in this project.
+    │
+    ├── __init__.py             <- Makes src a Python module
+    │
+    ├── config.py               <- Store useful variables and configuration
+    │
+    ├── dataset.py              <- Scripts to download or generate data
+    │
+    ├── features.py             <- Code to create features for modeling
+    │
+    ├── modeling                
+    │   ├── __init__.py 
+    │   ├── predict.py          <- Code to run model inference with trained models          
+    │   └── train.py            <- Code to train models
+    │
+    └── plots.py                <- Code to create visualizations
 ```
 
-## 快速开始
-### 1. 环境配置
+--------
+
+## Research Context
+
+This project addresses [clearly state research question] through [brief methodology description]. Our work builds upon existing literature in [research domain] while introducing [key innovation(s)].[2,3](@ref)
+
+**Key Contributions**:
+
+1. Contribution 1
+2. Contribution 2
+3. Contribution 3
+
+--------
+
+## Installation
+
+### System Requirements
+
+- ​**OS**: Linux/macOS/Windows (Tested on Ubuntu 22.04 LTS)
+- ​**Python**: ≥3.10
+- ​**Hardware**: [Specify if needed, e.g., NVIDIA GPU with CUDA 12.x]
+
+### Environment Setup
+
 ```bash
-# 克隆仓库
-git clone https://github.com/your-repo.git
+# Create conda environment (recommended)
+conda env create -f environment.yml
+conda activate src
 
-# 安装依赖（支持GPU加速）
-pip install -r requirements.txt
+# Alternative: pip installation
+python -m pip install -r requirements.txt
 ```
 
-### 2. 数据准备
+### Data Acquisition
+
+1. Download datasets from [DOI: 10.xxxx/zenodo.xxxxxx]/[Google Drive link]
+2. Place raw data in `data/raw/` following our [data documentation](docs/data_standards.md)
+3. Run preprocessing:
+
 ```bash
-# 执行预处理（生成邻接矩阵/气候特征）
-python scripts/data_preprocess.py
-
-# 验证数据完整性
-ls data/processed/adj_sparse.npz
-ls data/processed/climate_features.pt
+make data
 ```
 
-### 3. 模型训练
+--------
+
+## Methodology
+
+### Technical Framework
+
+![Research Framework](reports/figures/methodological_framework.png)  
+*Figure 1: Architectural overview of our approach*
+
+### Experimental Design
+
+| Component          | Implementation Details          |
+|--------------------|----------------------------------|
+| Data Processing    | [Brief description]             |  
+| Model Architecture | [Key technical specifications]   |
+| Training Protocol  | [Optimization strategy]          |
+| Evaluation Metrics | [List metrics with justification]|
+
+--------
+
+## Reproducibility
+
+### Computational Environment
+
+- Exact package versions: `pip freeze > requirements.txt`
+- Docker image: [Available on Docker Hub](https://hub.docker.com)
+- Pre-trained models: Stored in `models/` with checksums
+
+### Workflow Automation
+
 ```bash
-# 训练GNN模型（预测初始失效概率）
-python scripts/train_gnn.py
+# Full pipeline execution
+make all  # Processes data, trains models, generates reports
 
-# 查看训练结果
-tensorboard --logdir=runs/
+# Individual components
+make train      # Model training
+make evaluate   # Performance analysis
+make visualize  # Generate result figures
 ```
 
-### 4. 运行实验
-```bash
-# 单一灾害模拟（洪水示例）
-python experiments/single_hazard.py --disaster flood
+--------
 
-# 复合风险模拟（洪水+热浪）
-python experiments/composite_hazard.py --disasters flood heat
-```
+## Experimental Results
 
-## 核心功能
-### 动态系统建模
-```python
-# 微分方程核心逻辑（models/dynamic.py）
-def dynamic_system(state, t, probs, intensity_matrix, adj_sparse, adjacency_list, distances):
-    # 实现动态传播因子（DPF）计算
-    N1 = calculate_first_order_effects(...)  # 一阶邻居效应
-    N2 = calculate_second_order_effects(...) # 二阶环路效应
-    DPF = w1*N1 + w2*N2
-    dSdt = -k*probs*intensity*S + r*(1-S)*(1-DPF)
-    return dSdt
-```
+### Benchmark Performance
 
-### 复合风险网络
-```python
-# 注意力机制实现（models/arin.py）
-class ARIN(nn.Module):
-    def forward(self, intensities, avg_dist):
-        edge_index = self.build_interaction_graph()
-        h = self.gcn(intensities, edge_index)
-        alpha = self.attention_mechanism(h, avg_dist)
-        C_composite = torch.sum(alpha * intensities, dim=0)
-        return C_composite
-```
+| Model Variant       | Accuracy (↑) | F1 Score (↑) | Inference Time (ms) |
+|---------------------|--------------|--------------|---------------------|
+| Baseline           | 0.72         | 0.68         | 15.2               |
+| **Our Approach**   | **0.85**     | **0.82**     | 18.7               |
 
-## 结果示例
-![状态演化曲线](docs/state_evolution.png)
-_Figure: 不同灾害情景下的节点状态演化（72小时模拟）_
+### Visualization
 
-## 项目特点
-- **高性能计算**：采用稀疏矩阵加速邻接计算，支持13k+节点规模
-- **动态可视化**：自动生成风险扩散热力图（utils/vis_utils.py）
-- **可扩展架构**：新增灾害类型仅需修改配置文件
+![Performance Comparison](reports/figures/results_comparison.png)  
+*Figure 2: Comparative analysis across evaluation metrics*
 
-## 贡献指南
-1. Fork本仓库
-2. 创建feature分支 (`git checkout -b feature/fooBar`)
-3. 提交代码 (`git commit -m 'Add some fooBar'`)
-4. 推送分支 (`git push origin feature/fooBar`)
-5. 提交Pull~ Request
+--------
 
-## 引用
-如使用本项目请引用：
+## Contributing
+
+We welcome contributions following academic collaboration standards:
+
+1. Open an issue to discuss proposed changes
+2. Create feature branch: `git checkout -b feature/your-contribution`
+3. Implement changes with test cases
+4. Update documentation accordingly
+5. Submit pull request with:
+   - Technical description
+   - Empirical validation
+   - Citation for new methodologies
+
+**Code Standards**:
+
+- PEP8 compliance enforced via `flake8`
+- Type hints required for public functions
+- 90%+ test coverage required for merged code
+
+--------
+
+## License
+
+This project is licensed under the [MIT license License](LICENSE).
+
+--------
+
+## Citation
+
+If you use this work, please cite:
+
 ```bibtex
-@article{your2025paper,
-  title={Dynamic Cascading Failure Analysis in European Power Grids under Compound Climate Risks},
-  author={Your Name},
-  journal={Nature Energy},
-  year={2025}
+@article{author2025project,
+  title={Title of Your Paper},
+  author={Author1 and Author2},
+  journal={Journal Name},
+  volume={X},
+  pages={xx--xx},
+  year={2025},
+  doi={10.xxxx/xxxxx}
 }
 ```
 
-## 许可证
-本项目采用MIT许可证，详见[LICENSE](LICENSE)文件
+## Acknowledgements
+
+This research was supported by [Funding Agency] under Grant No. XXXXXX. Computational resources provided by [Institution/Cloud Provider].

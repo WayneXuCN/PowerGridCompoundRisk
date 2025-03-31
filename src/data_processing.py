@@ -4,7 +4,7 @@ import igraph as ig
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
-from scipy.sparse import coo_matrix, csr_matrix, lil_matrix, diags, eye, triu
+from scipy.sparse import coo_matrix, lil_matrix, diags, eye, triu
 from scipy.sparse.linalg import inv
 
 from config.parameters import ClimateParams
@@ -23,20 +23,20 @@ class PowerGridProcessor:
         # 2. 计算节点间地理距离矩阵
         distances = self._compute_distances_matrix(g)
         # 3. 生成邻接矩阵和高阶拓扑
-        adj_sparse, B1, L1_tilde = self._compute_hodge_laplacian(g) # 生成稀疏邻接矩阵
+        adj_sparse, B1, L1, L1_tilde = self._compute_hodge_laplacian(g)  # 生成稀疏邻接矩阵
         # 4. 生成节点风险特征矩阵 X（包含经纬度和气候风险）
         X = self._generate_climate_features(g)
         # 5. 生成边特征矩阵 Z（基于节点特征）
         edge_features = self._generate_edge_features(g, X)
         # 6. 保存预处理结果
-        self._save_processed_data(distances, adj_sparse,B1, L1_tilde, X, edge_features)
+        self._save_processed_data(distances, adj_sparse, B1, L1, L1_tilde, X, edge_features)
 
-        return adj_sparse, B1, L1_tilde, distances, X, edge_features
+        return adj_sparse, B1, L1,L1_tilde, distances, X, edge_features
 
     def _build_graph(self):
         """构建图结构"""
-        edges = pd.read_csv(self.edge_file, header=None).values.tolist() # 读取边数据
-        coords = pd.read_csv(self.coord_file, header=None) # 读取节点坐标数据
+        edges = pd.read_csv(self.edge_file, header=None).values.tolist()  # 读取边数据
+        coords = pd.read_csv(self.coord_file, header=None)  # 读取节点坐标数据
 
         g = ig.Graph.TupleList(edges, directed=False)  # 生成无向图
         g.vs["name"] = [int(v) for v in g.vs["name"]]  # 节点名转为整数
@@ -73,8 +73,12 @@ class PowerGridProcessor:
         lat_matrix = lats_rad[:, np.newaxis] - lats_rad[np.newaxis, :]
         lon_matrix = lons_rad[:, np.newaxis] - lons_rad[np.newaxis, :]
         # Haversine 公式
-        a = np.sin(lat_matrix / 2) ** 2 + np.cos(lats_rad[:, np.newaxis]) * np.cos(lats_rad[np.newaxis, :]) * np.sin(
-            lon_matrix / 2) ** 2
+        a = (
+            np.sin(lat_matrix / 2) ** 2
+            + np.cos(lats_rad[:, np.newaxis])
+            * np.cos(lats_rad[np.newaxis, :])
+            * np.sin(lon_matrix / 2) ** 2
+        )
         c = 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))  # 添加 clip 避免数值误差
 
         # 地球半径 (km)
@@ -156,18 +160,24 @@ class PowerGridProcessor:
         print(f"B2 shape: {B2.shape}")
         print(f"L1_tilde shape: {L1_tilde.shape}")
 
-        return adj_sparse, B1, L1_tilde
+        return adj_sparse, B1, L1, L1_tilde
 
     def _generate_climate_features(self, g):
         """生成节点风险特征（洪水、热浪、干旱）"""
         latitudes = np.array(g.vs["latitude"], dtype=np.float32)
         longitudes = np.array(g.vs["longitude"], dtype=np.float32)
         # 洪水风险：纬度越低风险越高
-        F = np.maximum(0, (ClimateParams.flood_max_lat - latitudes) / ClimateParams.flood_scale)
+        F = np.maximum(
+            0, (ClimateParams.flood_max_lat - latitudes) / ClimateParams.flood_scale
+        )
         # 热浪风险：纬度越高风险越高
-        H = np.maximum(0, (latitudes - ClimateParams.heat_min_lat) / ClimateParams.heat_scale)
+        H = np.maximum(
+            0, (latitudes - ClimateParams.heat_min_lat) / ClimateParams.heat_scale
+        )
         # 干旱风险：经度越东风险越高
-        D = np.maximum(0, (longitudes + ClimateParams.drought_offset) / ClimateParams.drought_scale)
+        D = np.maximum(
+            0, (longitudes + ClimateParams.drought_offset) / ClimateParams.drought_scale
+        )
         """
         # 归一化风险值到 [0, 1] 范围
         scaler = MinMaxScaler()
@@ -196,12 +206,15 @@ class PowerGridProcessor:
         print(f"边特征生成完成，形状：{edge_features.shape}")
         return edge_features
 
-    def _save_processed_data(self, distances, adj_sparse, B1, L1_tilde, X, edge_features):
+    def _save_processed_data(
+        self, distances, adj_sparse, B1,L1, L1_tilde, X, edge_features
+    ):
         """保存预处理结果"""
         # 使用稀疏矩阵格式保存
         sp.save_npz(PROCESSED_DATA_DIR / "distances.npz", distances)
         sp.save_npz(PROCESSED_DATA_DIR / "adj_sparse.npz", adj_sparse)
         sp.save_npz(PROCESSED_DATA_DIR / "B1.npz", B1)
+        sp.save_npz(PROCESSED_DATA_DIR / "L1.npz", L1)
         sp.save_npz(PROCESSED_DATA_DIR / "L1_tilde.npz", L1_tilde)
         np.save(PROCESSED_DATA_DIR / "X.npy", X)
         np.save(PROCESSED_DATA_DIR / "edge_features.npy", edge_features)
@@ -210,4 +223,4 @@ class PowerGridProcessor:
 
 if __name__ == "__main__":
     processor = PowerGridProcessor()
-    adj_sparse, B1, L1_tilde, distances, X, edge_features = processor.process()
+    adj_sparse, B1, L1, L1_tilde, distances, X, edge_features = processor.process()

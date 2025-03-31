@@ -1,32 +1,46 @@
-[project]
-name = "PowerGridCompoundRisk"
-version = "0.0.1"
-description = "My new paper"
-authors = [
-   {name = "Wenjie Xu", email = "wenjie.xu.cn@outlook.com"},
-]
-keywords = ["resilience","infrastructure","networks"]
-readme = "README.md"
-license = {file = "LICENSE"}
-requires-python = ">=3.12"
-dependencies = [
-    "numpy>2.0",
-    "scipy",
-    "igraph",
-    "matplotlib",
-    "pandas",
-    "notebook",
-    "plotly",
-    "pycairo",
-    "torch",
-    "torch_geometric",
-    "tensorflow",
-    "scikit-learn",
-    "numba",
-    "networkx"
-]
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
 
-[project.urls]
-Homepage = "https://wenjiexucn.github.io"
-Documentation = "https://readthedocs.org"
-Repository = "https://github.com/WayneXuCN/spam.git"
+[project]
+name = "src"
+version = "0.0.1"
+description = "A short description of the project."
+authors = [{ name = "Wenjie Xu", email = "wenjie.xu.cn@outlook.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = ["Programming Language :: Python :: 3"]
+dependencies = [
+  "numpy>2.0",
+  "scipy",
+  "igraph",
+  "matplotlib",
+  "pandas",
+  "notebook",
+  "plotly",
+  "pycairo",
+  "torch",
+  "torch_geometric",
+  "tensorflow",
+  "scikit-learn",
+  "numba",
+  "networkx",
+  "python-dotenv",
+  "tqdm",
+  "loguru",
+  "typer"
+]
+requires-python = "~=3.12.0"
+
+
+[tool.ruff]
+line-length = 99
+src = ["src"]
+include = ["pyproject.toml", "src/**/*.py"]
+
+[tool.ruff.lint]
+extend-select = ["I"] # Add import sorting
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+force-sort-within-sections = true
