@@ -9,6 +9,7 @@ import scipy.sparse as sp
 from scipy.sparse import coo_matrix, diags, eye, lil_matrix, triu
 from scipy.sparse.linalg import inv
 import typer
+from typing_extensions import Annotated
 
 from src.config import INTERIM_DATA_DIR, LOGS_DIR, RAW_DATA_DIR, ClimateParams
 
@@ -55,16 +56,16 @@ class PowerGridProcessor:
         # 2. 计算节点间地理距离矩阵
         distances = self._compute_distances_matrix(g)
         # 3. 生成邻接矩阵和高阶拓扑
-        adj_sparse, B1, L1, L1_tilde = self._compute_hodge_laplacian(g)
+        adj_sparse,adj_tilde_sparse, B1, L1, L1_tilde = self._compute_hodge_laplacian(g)
         # 4. 生成节点风险特征矩阵 X（包含经纬度和气候风险）
         X = self._generate_climate_features(g)
         # 5. 生成边特征矩阵 Z（基于节点特征）
         edge_features = self._generate_edge_features(g, X)
         # 6. 保存预处理结果
-        self._save_processed_data(distances, adj_sparse, B1, L1, L1_tilde, X, edge_features)
+        self._save_processed_data(distances, adj_sparse, adj_tilde_sparse, B1, L1, L1_tilde, X, edge_features)
 
         logger.success("数据处理流程已完成")
-        return adj_sparse, B1, L1, L1_tilde, distances, X, edge_features
+        return adj_sparse,adj_tilde_sparse, B1, L1, L1_tilde, distances, X, edge_features
 
     def _build_graph(self):
         """
@@ -163,13 +164,27 @@ class PowerGridProcessor:
             返回邻接矩阵、B1 矩阵、L1 矩阵和 L1_tilde 矩阵。
         """
         logger.info("正在计算 Hodge Laplacian 和高阶拓扑结构")
-
+        
         edges = np.array(g.get_edgelist())
         n_nodes, n_edges = g.vcount(), len(edges)
+        # 构建稀疏邻接矩阵
         adj_sparse = coo_matrix(
             (np.ones(len(edges)), (edges[:, 0], edges[:, 1])),
             shape=(g.vcount(), g.vcount()),
         ).tocsr()
+
+        # 节点度矩阵
+        D = diags(np.array(adj_sparse.sum(axis=1)).flatten())
+        # 归一化邻接矩阵 计算 D^(-1/2) * A * D^(-1/2)
+        # 先提取对角元素，计算-0.5次方，再构建对角矩阵
+        D_diag = np.array(D.diagonal())
+        # 防止除零错误，将零度节点的度设为1
+        zero_degrees = (D_diag == 0)
+        if np.any(zero_degrees):
+            logger.warning(f"检测到 {np.sum(zero_degrees)} 个零度节点，已处理以避免除零错误")
+            D_diag[zero_degrees] = 1.0
+        D_pow_minus_half = diags(np.power(D_diag, -0.5))
+        adj_tilde_sparse = D_pow_minus_half @ adj_sparse @ D_pow_minus_half
 
         edge_dict = {tuple(sorted(e)): idx for idx, e in enumerate(edges)}
 
@@ -228,7 +243,7 @@ class PowerGridProcessor:
         logger.info(f"B2 矩阵维度: {B2.shape}")
         logger.info(f"L1_tilde 矩阵维度: {L1_tilde.shape}")
 
-        return adj_sparse, B1, L1, L1_tilde
+        return adj_sparse,adj_tilde_sparse, B1, L1, L1_tilde
 
     def _generate_climate_features(self, g):
         """
@@ -293,7 +308,7 @@ class PowerGridProcessor:
         logger.info(f"边特征矩阵生成完成，维度：{edge_features.shape}")
         return edge_features
 
-    def _save_processed_data(self, distances, adj_sparse, B1, L1, L1_tilde, X, edge_features):
+    def _save_processed_data(self, distances, adj_sparse,adj_tilde_sparse, B1, L1, L1_tilde, X, edge_features):
         """
         保存处理结果到指定的输出目录。
 
@@ -304,7 +319,9 @@ class PowerGridProcessor:
         distances : scipy.sparse.csr_matrix
             节点间地理距离的稀疏矩阵。
         adj_sparse : scipy.sparse.csr_matrix
-            图的稀疏邻接矩阵。
+            稀疏邻接矩阵。
+        adj_tilde_sparse: scipy.sparse.csr_matrix
+            归一化邻接矩阵。
         B1 : scipy.sparse.csr_matrix
             B1 矩阵。
         L1 : scipy.sparse.csr_matrix
@@ -320,6 +337,7 @@ class PowerGridProcessor:
 
         sp.save_npz(self.output_dir / "distances.npz", distances)
         sp.save_npz(self.output_dir / "adj_sparse.npz", adj_sparse)
+        sp.save_npz(self.output_dir / "adj_tilde_sparse.npz", adj_tilde_sparse)
         sp.save_npz(self.output_dir / "B1.npz", B1)
         sp.save_npz(self.output_dir / "L1.npz", L1)
         sp.save_npz(self.output_dir / "L1_tilde.npz", L1_tilde)
@@ -330,27 +348,26 @@ class PowerGridProcessor:
 
 
 
-log_file = LOGS_DIR / "features.log"
-logger.add(log_file, mode="w")  # 表示覆盖保存
-
-
 app = typer.Typer()
 
 
 @app.command()
 def main(
-    edge_file: Path = RAW_DATA_DIR / "european/powergridEU_E.csv",
-    coord_file: Path = RAW_DATA_DIR / "european/powergridEU_V.csv",
-    output_dir: Path = INTERIM_DATA_DIR,
+    edge_file: Annotated[
+        Path,
+        typer.Argument(help="边数据文件路径，包含电网边信息"),
+    ] = RAW_DATA_DIR / "european/powergridEU_E.csv",
+    coord_file: Annotated[
+        Path,
+        typer.Argument(help="节点坐标数据文件路径，包含节点位置信息"),
+    ] = RAW_DATA_DIR / "european/powergridEU_V.csv",
+    output_dir: Annotated[Path, typer.Argument(help="处理结果保存目录路径")] = INTERIM_DATA_DIR,
 ):
     """
     从原始数据文件生成电网图特征，并将结果保存至指定目录。
-
-    Args:\n
-        edge_file: 边数据文件路径，包含电网边信息 \n
-        coord_file: 节点坐标数据文件路径，包含节点位置信息 \n
-        output_dir: 处理结果保存目录路径 \n
     """
+    log_file = LOGS_DIR / "features.log"
+    logger.add(log_file, mode="w")  # 表示覆盖保存
     logger.info("开始电网图数据特征处理")
 
     # 初始化 PowerGridProcessor 处理器
@@ -359,7 +376,7 @@ def main(
     )
 
     # 执行数据处理
-    adj_sparse, B1, L1, L1_tilde, distances, X, edge_features = processor.process()
+    adj_sparse,adj_tilde_sparse, B1, L1, L1_tilde, distances, X, edge_features = processor.process()
 
     # 处理完成后记录日志
     logger.success("电网图特征处理完成")

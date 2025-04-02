@@ -11,20 +11,14 @@ PYTHON_INTERPRETER = python
 #################################################################################
 
 
-## Install Python dependencies
-.PHONY: requirements
-requirements:
-	uv sync
-	
-
-
-
-## Delete all compiled Python files
+## Clean all Python files cache
 .PHONY: clean
 clean:
+	@echo "Delete all compiled Python files..."
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-
+	@echo "Cleaning all Jupyter Notebooks cache..."
+	find . -name "*.ipynb" -exec nb-clean clean {} \;
 
 ## Lint using ruff (use `make format` to do formatting)
 .PHONY: lint
@@ -37,21 +31,6 @@ lint:
 format:
 	ruff check --fix
 	ruff format
-
-
-
-
-
-## Set up Python interpreter environment
-.PHONY: create_environment
-create_environment:
-	uv venv --python $(PYTHON_VERSION)
-	@echo ">>> New uv virtual environment created. Activate with:"
-	@echo ">>> Windows: .\\\\.venv\\\\Scripts\\\\activate"
-	@echo ">>> Unix/macOS: source ./.venv/bin/activate"
-
-
-
 
 #################################################################################
 # PROJECT RULES                                                                 #

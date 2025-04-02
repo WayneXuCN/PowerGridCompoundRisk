@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "src"
-version = "0.0.1"
+version = "0.1.0"
 description = "A short description of the project."
 authors = [{ name = "Wenjie Xu", email = "wenjie.xu.cn@outlook.com" }]
 license = { file = "LICENSE" }
@@ -14,7 +14,7 @@ dependencies = [
   "numpy>2.0",
   "scipy",
   "igraph",
-  "matplotlib",
+  "seaborn",
   "pandas",
   "notebook",
   "plotly",
@@ -28,7 +28,9 @@ dependencies = [
   "python-dotenv",
   "tqdm",
   "loguru",
-  "typer"
+  "typer",
+  "tabulate",
+  "torchinfo"
 ]
 requires-python = "~=3.12.0"
 
