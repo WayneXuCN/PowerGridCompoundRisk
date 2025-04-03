@@ -1,9 +1,10 @@
+from loguru import logger
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from loguru import logger
-from src.config import LOGS_DIR
 from torchinfo import summary
+
+from src.config import LOGS_DIR
 
 
 # HoSC 单层模块：高阶单纯形卷积
@@ -87,7 +88,7 @@ class HoT_GNN(nn.Module):
         self.fc1 = nn.Linear(
             node_hidden[-1] + len(edge_hidden), 2 * n_nodes
         )  # [d_{L_n} + L_e, 2n]
-        self.fc2 = nn.Linear(2 * n_nodes, n_nodes)  # [2n, n]
+        self.fc2 = nn.Linear(2 * n_nodes, 1)
 
     def forward(self, X_n, X_e, A_tilde, L1_tilde, B1):
         # 节点特征提取
@@ -107,7 +108,7 @@ class HoT_GNN(nn.Module):
         f = self.fc2(f)  # 特征映射回节点空间：第二层全连接 [n, n]
 
         # 概率输出
-        z_p = F.sigmoid(f)  # 独立概率 [n, n]，每个元素在 [0,1]
+        z_p = F.sigmoid(f).squeeze(-1)
         return z_p  # 单样本输出 [n]，例如 [100]
 
 
@@ -133,12 +134,15 @@ if __name__ == "__main__":
     logger.info("=== Model Summary ===")
     logger.info(
         "\n"
-        + str(summary(
-            model,
-            input_data=(X_n, X_e, A_tilde, L1_tilde, B1),
-            depth=4,
-            col_names=["input_size", "output_size", "num_params"],
-        ))
+        + str(
+            summary(
+                model,
+                input_data=(X_n, X_e, A_tilde, L1_tilde, B1),
+                depth=4,
+                col_names=["input_size", "output_size", "num_params"],
+                verbose=0,
+            )
+        )
     )
 
     z_p = model(X_n, X_e, A_tilde, L1_tilde, B1)

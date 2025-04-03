@@ -27,6 +27,7 @@ class HigherOrderSimplicialConv(nn.Module):
 
         return Z_max
 
+
 class HoSC(nn.Module):
     def __init__(self, input_dim, hidden_dims):
         super().__init__()
@@ -46,6 +47,7 @@ class HoSC(nn.Module):
         # 沿特征维度拼接所有层的输出
         return torch.cat(Z_list, dim=1)  # [M, num_layers]
 
+
 class HOTNet(nn.Module):
     def __init__(self, edge_features, hidden_dims, num_classes=1):
         super().__init__()
@@ -55,7 +57,7 @@ class HOTNet(nn.Module):
     def forward(self, data):
         # 提取边特征和Hodge矩阵
         edge_attr = data.edge_attr  # [M, edge_features]
-        L1_tilde = data.L1_tilde    # [M, M]
+        L1_tilde = data.L1_tilde  # [M, M]
 
         # 通过HoSC模块得到边级嵌入
         Z_H = self.hosc(edge_attr, L1_tilde)  # [M, num_layers]

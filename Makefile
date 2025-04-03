@@ -11,14 +11,16 @@ PYTHON_INTERPRETER = python
 #################################################################################
 
 
-## Clean all Python files cache
+## Clean all files cache
 .PHONY: clean
 clean:
-	@echo "Delete all compiled Python files..."
+	@echo "Delete compiled Python files..."
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
-	@echo "Cleaning all Jupyter Notebooks cache..."
+	@echo "Cleaning Jupyter Notebooks cache..."
 	find . -name "*.ipynb" -exec nb-clean clean {} \;
+	@echo "Cleaning ruff cache..."
+	ruff clean
 
 ## Lint using ruff (use `make format` to do formatting)
 .PHONY: lint

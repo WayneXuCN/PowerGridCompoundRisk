@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Annotated
+
 import igraph as ig
 from loguru import logger
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
+from tabulate import tabulate
 import typer
-from tabulate import tabulate  # 用于格式化表格输出
 
 from src.config import INTERIM_DATA_DIR, LOGS_DIR, RAW_DATA_DIR
 
@@ -112,19 +113,27 @@ def log_results(graph_properties: dict, matrices: dict, log_file: Path):
         日志文件路径
     """
     logger.add(log_file, mode="w")  # 覆盖保存日志文件
-    
+
     # 格式化输出图属性表
     logger.info("=== Graph Summary ===")
-    graph_properties_table = pd.DataFrame(list(graph_properties.items()), columns=["Property", "Value"])
-    logger.info("\n" + tabulate(graph_properties_table, headers="keys", tablefmt="grid", showindex=False))
+    graph_properties_table = pd.DataFrame(
+        list(graph_properties.items()), columns=["Property", "Value"]
+    )
+    logger.info(
+        "\n" + tabulate(graph_properties_table, headers="keys", tablefmt="grid", showindex=False)
+    )
 
     # 输出矩阵形状
     logger.info("=== Matrix Shapes ===")
-    matrix_shapes_table = pd.DataFrame({
-        "Matrix": list(matrices.keys()),
-        "Shape": [str(matrix.shape) for matrix in matrices.values()]
-    })
-    logger.info("\n" + tabulate(matrix_shapes_table, headers="keys", tablefmt="grid", showindex=False))
+    matrix_shapes_table = pd.DataFrame(
+        {
+            "Matrix": list(matrices.keys()),
+            "Shape": [str(matrix.shape) for matrix in matrices.values()],
+        }
+    )
+    logger.info(
+        "\n" + tabulate(matrix_shapes_table, headers="keys", tablefmt="grid", showindex=False)
+    )
 
 
 app = typer.Typer()
@@ -149,8 +158,8 @@ def generate_graph_info(
     生成并保存图的信息并展示中间矩阵形状
     """
     # 设置日志文件输出
-    log_file = LOGS_DIR / "graph_info.log"
-    
+    log_file = LOGS_DIR / "european_graph_info.log"
+
     # 加载数据
     edges, coords = load_data(edge_file, coord_file)
 
