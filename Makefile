@@ -19,6 +19,8 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	@echo "Cleaning Jupyter Notebooks cache..."
 	find . -name "*.ipynb" -exec nb-clean clean {} \;
+	@echo "Cleaning Marimo cache..."
+	find . -type d -name "__marimo__" -exec rm -rf {} +
 	@echo "Cleaning ruff cache..."
 	ruff clean
 
