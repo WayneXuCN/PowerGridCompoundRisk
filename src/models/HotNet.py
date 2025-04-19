@@ -121,7 +121,7 @@ if __name__ == "__main__":
     B1 = torch.randn(n, M)  # 边到节点映射 [n, M]
 
     # 模型初始化
-    model = HoT_GNN(
+    model = GNN(
         n_nodes=n,
         node_features=3,
         edge_features=3,
